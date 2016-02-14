@@ -18,6 +18,9 @@
 /* The maximum number of FQDN:port:service things we can 
  * put inside a payload */
 #define DST_MAX_SERVICE_SPECS 16
+/* The maximum number of services we can store
+   before reallocating */
+#define DST_DEFAULT_TABLE_SIZE 32
 
 typedef enum {
 	DST_UNDEFINED_COMMAND,
@@ -40,5 +43,6 @@ int dst_parse_payload_to_specs(			 /* parse.c */
 	ssize_t payload_sz,
 	int session_fd
 );
+int dst_update_services_table(DST_SERVICE *service_buf); /* table.c */
 
 #endif /* __H_DST__ */

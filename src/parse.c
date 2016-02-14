@@ -20,6 +20,7 @@ int dst_parse_service(char *payload, ssize_t *cur, ssize_t payload_sz, DST_SERVI
 		(*cur)++;
 	}
 	payload[*cur] = '\0';
+	(*cur)++;
 	/* Finally extract the service */
 	sservice = payload + *cur;
 	while(payload[*cur] != ',' && *cur < payload_sz) {
@@ -29,6 +30,7 @@ int dst_parse_service(char *payload, ssize_t *cur, ssize_t payload_sz, DST_SERVI
 		return -1; /* Bad deliminator */
 	}
 	payload[*cur] = '\0';
+	(*cur)++;
 
 	/* Convert the port into a integer */
 	port = strtoul(sport, NULL, 10);
@@ -37,7 +39,7 @@ int dst_parse_service(char *payload, ssize_t *cur, ssize_t payload_sz, DST_SERVI
 	}
 
 	/* Check the lengths of the other two strings */
-	if (strlen(sfqdn) <= 4) {
+	if (strlen(sfqdn) <= 1) {
 		return -3; /* Bad FQDN format */
 	}
 	if (strlen(sservice) <= 1) {
@@ -62,8 +64,8 @@ int dst_parse_payload_to_specs(
 ) {
 	ssize_t cur = 0;
 	int status, i;
-	for (i = 0; i < DST_MAX_SERVICE_SPECS; i++) {
-		status = dst_parse_service(payload_buf, &cur, payload_sz, service_buf + i);
+	for (i = 0; i < DST_MAX_SERVICE_SPECS && cur < payload_sz; i++) {
+		status = dst_parse_service(payload_buf + cur, &cur, payload_sz, service_buf + i);
 		switch(status) {
 			case -1: send_error(fd, "ERR_BAD_DELIM"); break;
 			case -2: send_error(fd, "ERR_BAD_PORT"); break;

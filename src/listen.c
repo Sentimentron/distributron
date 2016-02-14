@@ -48,6 +48,9 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 	int status;
 	unsigned long sz;
 
+	/* Initialise arguments */
+	memset(service_buf, 0, DST_MAX_SERVICE_SPECS * sizeof(DST_SERVICE));
+
 	/* Receive argument size */
 	r = recv(session_fd, payload_size_buf, 4, 0);
 	if (r == 4) {
@@ -93,6 +96,13 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 
 	if (status) {
 		return status;
+	}
+
+	switch(c) {
+		case DST_REGISTER_COMMAND:
+			dst_update_services_table(service_buf);
+		default:
+			break;
 	}
 
 	/* Dispatch the right cmd */
