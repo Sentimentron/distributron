@@ -67,7 +67,7 @@ class TestRawSend(unittest.TestCase):
 
 	def test_bad_host(self):
 		cmd = "{:<8}".format("REGISTER")
-		payload = "127:1811:SomeService,"
+		payload = "1:1811:SomeService,"
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
