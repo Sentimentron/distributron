@@ -51,11 +51,51 @@ class TestRawSend(unittest.TestCase):
 
 	def test_everything_correct(self):
 		cmd = "{:<8}".format("BROKER")
-		payload = "127.0.0.1:1811:SomeService"
+		payload = "SomeService"
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
 		self.assertEquals(response, "OK")
+
+	def test_bad_delim(self):
+		cmd = "{:<8}".format("REGISTER")
+		payload = "127:1811:SomeService"
+		l = len(payload)
+		size = "{:<4}".format(l)
+		response = rawsend(cmd + size + payload)
+		self.assertEquals(response, "ERR_BAD_DELIM")
+
+	def test_bad_host(self):
+		cmd = "{:<8}".format("REGISTER")
+		payload = "127:1811:SomeService,"
+		l = len(payload)
+		size = "{:<4}".format(l)
+		response = rawsend(cmd + size + payload)
+		self.assertEquals(response, "ERR_BAD_HOST")
+
+	def test_bad_service(self):
+		cmd = "{:<8}".format("REGISTER")
+		payload = "127.0.0.1:1811:,"
+		l = len(payload)
+		size = "{:<4}".format(l)
+		response = rawsend(cmd + size + payload)
+		self.assertEquals(response, "ERR_BAD_SRV")
+
+	def test_bad_port(self):
+		cmd = "{:<8}".format("REGISTER")
+		payload = "127.0.0.1::,"
+		l = len(payload)
+		size = "{:<4}".format(l)
+		response = rawsend(cmd + size + payload)
+		self.assertEquals(response, "ERR_BAD_PORT")
+
+	def test_bad_port_toosmall(self):
+		cmd = "{:<8}".format("REGISTER")
+		payload = "127.0.0.1:-128:sp,"
+		l = len(payload)
+		size = "{:<4}".format(l)
+		response = rawsend(cmd + size + payload)
+		self.assertEquals(response, "ERR_BAD_PORT")
 
 if __name__ == "__main__":
 	unittest.main()	

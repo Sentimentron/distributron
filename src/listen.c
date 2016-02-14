@@ -43,7 +43,9 @@ int dst_send_trylater(int fd) {
 int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 	char payload_size_buf[] = {0, 0, 0, 0, 0};
 	char payload_buf[DST_PAYLOAD_MAX_LENGTH+1];
+	DST_SERVICE service_buf[DST_MAX_SERVICE_SPECS];
 	ssize_t r;
+	int status;
 	unsigned long sz;
 
 	/* Receive argument size */
@@ -75,6 +77,24 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 		return dst_send_badpayload(session_fd);
 	}
 	
+	switch(c) {
+		case DST_REGISTER_COMMAND:
+		case DST_WITHDRAW_COMMAND:
+			status = dst_parse_payload_to_specs(
+				payload_buf,
+				service_buf,
+				sz, 
+				session_fd
+			);
+			break;
+		default:
+			status = 0;
+	}
+
+	if (status) {
+		return status;
+	}
+
 	/* Dispatch the right cmd */
 	assert(c != DST_UNDEFINED_COMMAND);
 
