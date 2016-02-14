@@ -47,7 +47,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)*2
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_PAYLOAD")
+		self.assertEqual(response, "ERR_BAD_PAYLOAD")
 
 	def test_everything_correct(self):
 		cmd = "{:<8}".format("BROKER")
@@ -55,7 +55,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "OK")
+		self.assertEqual(response, "OK")
 
 	def test_bad_delim(self):
 		cmd = "{:<8}".format("REGISTER")
@@ -63,7 +63,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_DELIM")
+		self.assertEqual(response, "ERR_BAD_DELIM")
 
 	def test_bad_host(self):
 		cmd = "{:<8}".format("REGISTER")
@@ -71,7 +71,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_HOST")
+		self.assertEqual(response, "ERR_BAD_HOST")
 
 	def test_bad_service(self):
 		cmd = "{:<8}".format("REGISTER")
@@ -79,7 +79,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_SRV")
+		self.assertEqual(response, "ERR_BAD_SRV")
 
 	def test_bad_port(self):
 		cmd = "{:<8}".format("REGISTER")
@@ -87,7 +87,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_PORT")
+		self.assertEqual(response, "ERR_BAD_PORT")
 
 	def test_bad_port_toosmall(self):
 		cmd = "{:<8}".format("REGISTER")
@@ -95,7 +95,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEquals(response, "ERR_BAD_PORT")
+		self.assertEqual(response, "ERR_BAD_PORT")
 
 if __name__ == "__main__":
 	unittest.main()	

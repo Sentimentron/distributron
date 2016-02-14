@@ -10,9 +10,9 @@ def rawsend(payload):
 		s.connect(("127.0.0.1", 11818))
 		s.sendall(payload.encode('utf8'))
 		response = s.recv(1024).decode('utf8')
-		print(response)
 		s.close()
-		sleep(0.05)
+		if response == "ERR_BAD_CMD_READ":
+			sleep(0.05)
 	return response.split(u'\0',1)[0]
 
 def broker(service):	

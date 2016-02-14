@@ -50,6 +50,7 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 
 	/* Initialise arguments */
 	memset(service_buf, 0, DST_MAX_SERVICE_SPECS * sizeof(DST_SERVICE));
+	memset(payload_buf, 0, DST_PAYLOAD_MAX_LENGTH + 1);
 
 	/* Receive argument size */
 	r = recv(session_fd, payload_size_buf, 4, 0);
@@ -175,7 +176,7 @@ int dst_start_listening() {
 				(char *)&maxwait, sizeof(struct timeval));
 		
 		/* Read the command */
-		r = recv(session_fd, cmd_buf, DST_COMMAND_MAX_LENGTH, MSG_DONTWAIT);
+		r = recv(session_fd, cmd_buf, DST_COMMAND_MAX_LENGTH, 0);
 		if (r == DST_COMMAND_MAX_LENGTH) {
 			/* Determine which command this is */
 			DST_COMMAND c = dst_derive_command(cmd_buf);
