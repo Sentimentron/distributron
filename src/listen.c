@@ -10,6 +10,14 @@
 
 #include "dst.h"
 
+int dst_send_badcmd(int fd) {
+	return send(fd, "ERR_BAD_CMD", 12, MSG_NOSIGNAL);
+}
+
+int dst_send_trylater(int fd) {
+	return send(fd, "TRY_LATER", 9, MSG_NOSIGNAL);
+}
+
 int dst_start_listening() {
 	/* Starts listening on localhost:118118 */
 
@@ -48,6 +56,8 @@ int dst_start_listening() {
 
 	while(1) {
 		int session_fd; 
+		char cmd_buf[DST_COMMAND_MAX_LENGTH];
+		ssize_t r;
 		/* Accept the connection */
 		session_fd = accept(server_fd, NULL, NULL);
 		if (session_fd == -1) {
@@ -56,6 +66,25 @@ int dst_start_listening() {
 				continue;
 			}
 			DST_PERROR("accept() error");
+		}
+		
+		/* Read the command */
+		r = recv(session_fd, cmd_buf, DST_COMMAND_MAX_LENGTH, MSG_DONTWAIT);
+		if (r == DST_COMMAND_MAX_LENGTH) {
+			/* Determine which command this is */
+			DST_COMMAND c = dst_derive_command(cmd_buf);
+			switch(c) {
+				default:
+					dst_send_badcmd(session_fd);
+			}
+		} else if (r == -1) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				dst_send_badcmd(session_fd);
+			} else {
+				perror("bad read");
+			}
+		} else {
+			dst_send_badcmd(session_fd);
 		}
 		close(session_fd);
 	}
