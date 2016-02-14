@@ -3,6 +3,14 @@
 import socket
 from time import sleep
 
+def _val_service(s):
+	if ":" in s:
+		raise ValueError("service names cannot include ':'")
+	if "," in s:
+		raise ValueError("service names cannot include ','")
+	if " " in s:
+		raise ValueError("service names cannot include ' '")
+
 def rawsend(payload):	
 	response = "ERR_BAD_CMD_READ"
 	while response == "ERR_BAD_CMD_READ":
@@ -17,10 +25,15 @@ def rawsend(payload):
 
 def broker(service):	
 	cmd = "{:<8}".format("BROKER")
+	l = len(service)
 	payload = "{:<1024}".format(service)
+	l = "{:<4}".format(l)
 
-	response = rawsend(cmd + payload)
-	
+	response = rawsend(cmd + l + payload)
+
+	if response == "<null>":
+		return None
+
 	# If the response is valid, the first few characters
 	# should be 'OK' followed by a space.
 	if response[0:3] == "OK ":
@@ -29,14 +42,22 @@ def broker(service):
 		# followed by a comma
 		responses = response.split(',')
 		for response in responses:
-			fqdn,_,port = response.partition(':')
-			yield fqdn, int(port)
+			if len(response) == 0:
+				break
+			fqdn, port, service = response.split(':')
+			yield fqdn, int(port), service
 
 	# Otherwise, the entire response is the error message
 	else:
 		raise Exception(response)
 
+def clearall():
+	return rawsend("{:<8}".format("CLEARALL"))
+
 def register(service, port):
+
+	_val_service(service)
+
 	hostname = socket.gethostname()
 
 	if type(port) != type(0):
@@ -53,13 +74,11 @@ def register(service, port):
 	response = rawsend(cmd + l + payload)
 	return response
 
-def clearall():
-	cmd = "{:<8}".format("CLEARALL")
-	response = rawsend(cmd)
-	return response
 
 def withdraw(service, port, hostname=socket.gethostname()):
 	
+	_val_service(service)
+
 	cmd = "{:<8}".format("WITHDRAW")
 	payload = "%s:%d:%s," % (hostname, port, service)
 	

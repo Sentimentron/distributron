@@ -88,7 +88,7 @@ int dst_update_services_table(DST_SERVICE *buf) {
 static const DST_SERVICE *dst_search_services_table(int *start, const char *name) {
 	int i;
 	for (i = *start; i < table_capacity; i++) {
-		*start = i;
+		*start = i+1;
 		DST_SERVICE *s = table[i];
 		if (s == NULL) break;
 		if (!s->active) continue;
@@ -105,12 +105,19 @@ int dst_cmd_broker(const char *payload, int fd) {
 	const DST_SERVICE *ret[16], *shuf[16]; /* can return up to 16 services at once */
 	char buf[1024], tmp[1024]; /* used for response message */
 	int i = 0, j = 0, c = 0;
+
+	memset(shuf, 0, 16 * sizeof(DST_SERVICE*));
+	memset(ret, 0, 16 * sizeof(DST_SERVICE*));
+	memset(buf, 0, 1024);
+	memset(tmp, 0, 1024);
+	
 	/* look for matching services */
 	while (i < table_capacity && c < 16) {
 		const DST_SERVICE *s = dst_search_services_table(&i, payload);
 		if (s == NULL) {
 			break; /* no more services */
 		}
+		
 		ret[c++] = s;
 	}
 
@@ -120,11 +127,13 @@ int dst_cmd_broker(const char *payload, int fd) {
 			int n = rand() % c;
 			if (shuf[n]) continue;
 			shuf[n] = ret[i];
+			break;
 		}
 	}
 
 	/* build the response message */
-	i = 0; j = 0;
+	i = 3; j = 0;
+	strcpy(buf, "OK ");
 	while (i < 1024 && j < c) {
 		int s = snprintf(
 				tmp, 
@@ -134,13 +143,13 @@ int dst_cmd_broker(const char *payload, int fd) {
 				shuf[j]->port,
 				shuf[j]->service
 			);
-		i += s;
 		j++;
 		memcpy(buf + i, tmp, s);
+		i += s;
 	}
 
 	/* send the response */
-	if (i == 0) {
+	if (j == 0) {
 		dsendr("<null>", fd);
 	} else {
 		dsendr(buf, fd);

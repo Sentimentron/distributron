@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
-from dst import rawsend
+from dst import rawsend, clearall
 
 class TestRawSend(unittest.TestCase):
-	
+	def setUp(self):
+		clearall()
+		
 	def test_badcmd(self):
 		payload = "{:<1024}".format("Hi there!")
 		cmd = "{:<8}".format("HI")
@@ -55,7 +57,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEqual(response, "OK")
+		self.assertEqual(response, "<null>")
 
 	def test_bad_delim(self):
 		cmd = "{:<8}".format("REGISTER")

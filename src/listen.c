@@ -104,8 +104,7 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 			dst_update_services_table(service_buf);
 			break;
 		case DST_BROKER_COMMAND:
-			dst_cmd_broker(payload_buf, session_fd);
-			break;
+			return dst_cmd_broker(payload_buf, session_fd);
 		default:
 			break;
 	}
