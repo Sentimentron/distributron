@@ -11,6 +11,7 @@
 	} while(0)
 
 #define DST_COMMAND_MAX_LENGTH 8
+#define DST_PAYLOAD_MAX_LENGTH 1024
 
 typedef enum {
 	DST_UNDEFINED_COMMAND,
