@@ -53,6 +53,10 @@ def register(service, port):
 	response = rawsend(cmd + l + payload)
 	return response
 
+def clearall():
+	cmd = "{:<8}".format("CLEARALL")
+	response = rawsend(cmd)
+	return response
 
 def withdraw(service, port, hostname=socket.gethostname()):
 	

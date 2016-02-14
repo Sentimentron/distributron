@@ -102,6 +102,10 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 	switch(c) {
 		case DST_REGISTER_COMMAND:
 			dst_update_services_table(service_buf);
+			break;
+		case DST_BROKER_COMMAND:
+			dst_cmd_broker(payload_buf, session_fd);
+			break;
 		default:
 			break;
 	}
@@ -180,7 +184,10 @@ int dst_start_listening() {
 		if (r == DST_COMMAND_MAX_LENGTH) {
 			/* Determine which command this is */
 			DST_COMMAND c = dst_derive_command(cmd_buf);
-			if (c != DST_UNDEFINED_COMMAND) {
+			if (c == DST_CLEAR_COMMAND) {	
+				dst_cmd_clear();
+				dst_send_ok(session_fd);
+			} else if (c != DST_UNDEFINED_COMMAND) {
 				dst_exec_cmd(c, session_fd);
 			} else {
 				dst_send_badcmd(session_fd);

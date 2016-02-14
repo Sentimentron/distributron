@@ -26,7 +26,8 @@ typedef enum {
 	DST_UNDEFINED_COMMAND,
 	DST_BROKER_COMMAND,
 	DST_REGISTER_COMMAND,
-	DST_WITHDRAW_COMMAND
+	DST_WITHDRAW_COMMAND,
+	DST_CLEAR_COMMAND
 } DST_COMMAND;
 
 typedef struct {
@@ -44,5 +45,7 @@ int dst_parse_payload_to_specs(			 /* parse.c */
 	int session_fd
 );
 int dst_update_services_table(DST_SERVICE *service_buf); /* table.c */
+int dst_cmd_broker(const char *payload, int session_fd);
+int dst_cmd_clear(void);
 
 #endif /* __H_DST__ */

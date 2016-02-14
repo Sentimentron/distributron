@@ -1,1 +1,1 @@
-from .dial import broker, register, withdraw, rawsend
+from .dial import broker, register, withdraw, rawsend, clearall

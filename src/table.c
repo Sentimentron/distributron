@@ -1,6 +1,7 @@
 #include "dst.h"
 
 #include <stdlib.h>
+#include <sys/socket.h>
 
 static DST_SERVICE **table = NULL;
 static int table_capacity  = 0;
@@ -82,4 +83,79 @@ static int dst_inner_update_services_table(DST_SERVICE *buf, int start) {
 
 int dst_update_services_table(DST_SERVICE *buf) {
 	return dst_inner_update_services_table(buf, 0);
+}
+
+static const DST_SERVICE *dst_search_services_table(int *start, const char *name) {
+	int i;
+	for (i = *start; i < table_capacity; i++) {
+		*start = i;
+		DST_SERVICE *s = table[i];
+		if (s == NULL) break;
+		if (!s->active) continue;
+		if (strcmp(s->service, name) == 0) return s;
+	}
+	return NULL;
+}
+
+static void dsendr(char *r, int fd) {
+	send(fd, r, strlen(r), MSG_NOSIGNAL);
+}
+
+int dst_cmd_broker(const char *payload, int fd) {
+	const DST_SERVICE *ret[16], *shuf[16]; /* can return up to 16 services at once */
+	char buf[1024], tmp[1024]; /* used for response message */
+	int i = 0, j = 0, c = 0;
+	/* look for matching services */
+	while (i < table_capacity && c < 16) {
+		const DST_SERVICE *s = dst_search_services_table(&i, payload);
+		if (s == NULL) {
+			break; /* no more services */
+		}
+		ret[c++] = s;
+	}
+
+	/* pseudo-randomly shuffle the response */
+	for (i = 0; i < c; i++) {
+		while(1) {
+			int n = rand() % c;
+			if (shuf[n]) continue;
+			shuf[n] = ret[i];
+		}
+	}
+
+	/* build the response message */
+	i = 0; j = 0;
+	while (i < 1024 && j < c) {
+		int s = snprintf(
+				tmp, 
+				1024, 
+				"%s:%d:%s,", 
+				shuf[j]->fqdn,
+				shuf[j]->port,
+				shuf[j]->service
+			);
+		i += s;
+		j++;
+		memcpy(buf + i, tmp, s);
+	}
+
+	/* send the response */
+	if (i == 0) {
+		dsendr("<null>", fd);
+	} else {
+		dsendr(buf, fd);
+	}
+
+	return 0;
+}	
+
+int dst_cmd_clear() {
+	/* invalidate everything in the table */
+	int i;
+	for (i = 0; i < table_capacity; i++) {
+		DST_SERVICE *s = table[i];
+		if (s == NULL) break;
+		s->active = 0;
+	}
+	return 0;
 }
