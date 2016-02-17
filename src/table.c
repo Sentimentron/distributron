@@ -85,7 +85,7 @@ int dst_update_services_table(DST_SERVICE *buf) {
 	return dst_inner_update_services_table(buf, 0);
 }
 
-static const DST_SERVICE *dst_search_services_table(int *start, const char *name) {
+static DST_SERVICE *dst_search_services_table(int *start, const char *name) {
 	int i;
 	for (i = *start; i < table_capacity; i++) {
 		*start = i+1;
@@ -99,6 +99,29 @@ static const DST_SERVICE *dst_search_services_table(int *start, const char *name
 
 static void dsendr(char *r, int fd) {
 	send(fd, r, strlen(r), MSG_NOSIGNAL);
+}
+
+int dst_trim_services_table(const DST_SERVICE *service_buf) {
+	int i, j;
+	for (i = 0, j = 0; i < DST_MAX_SERVICE_SPECS; i++) {
+		const DST_SERVICE *s = service_buf + i;
+		DST_SERVICE *t;
+		if (!s->port) break; /* reached the end of what's defined */
+		while (j < table_capacity) {
+			t = dst_search_services_table(&j, s->service);
+			if (t == NULL) continue;
+			if (t->port != s->port) /* same service, different port */
+				continue;
+
+			if (!t->active) continue; 
+
+			if (strcmp(t->fqdn, s->fqdn) != 0) continue;
+
+			t->active = 0; /* deactivate the service */
+			break;
+		}
+	}
+	return 0;
 }
 
 int dst_cmd_broker(const char *payload, int fd) {
@@ -117,7 +140,7 @@ int dst_cmd_broker(const char *payload, int fd) {
 		if (s == NULL) {
 			break; /* no more services */
 		}
-		
+		if (!s->active) continue;	
 		ret[c++] = s;
 	}
 

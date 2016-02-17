@@ -45,6 +45,7 @@ int dst_parse_payload_to_specs(			 /* parse.c */
 	int session_fd
 );
 int dst_update_services_table(DST_SERVICE *service_buf); /* table.c */
+int dst_trim_services_table(const DST_SERVICE *service_buf);
 int dst_cmd_broker(const char *payload, int session_fd);
 int dst_cmd_clear(void);
 

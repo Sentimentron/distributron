@@ -81,12 +81,9 @@ def withdraw(service, port, hostname=socket.gethostname()):
 
 	cmd = "{:<8}".format("WITHDRAW")
 	payload = "%s:%d:%s," % (hostname, port, service)
+	l = "{:<4}".format(len(payload))
 	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(("127.0.0.1", 118118))
-	s.send(cmd + payload)
-	response = s.recv(32).decode('utf8')
-	s.close()
+	response = rawsend(cmd + l + payload)
 
 	if response == "OK":
 		return True

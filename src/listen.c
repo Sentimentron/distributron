@@ -103,6 +103,9 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 		case DST_REGISTER_COMMAND:
 			dst_update_services_table(service_buf);
 			break;
+		case DST_WITHDRAW_COMMAND:
+			dst_trim_services_table(service_buf);
+			break;
 		case DST_BROKER_COMMAND:
 			return dst_cmd_broker(payload_buf, session_fd);
 		default:
