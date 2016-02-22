@@ -108,6 +108,8 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 			break;
 		case DST_BROKER_COMMAND:
 			return dst_cmd_broker(payload_buf, session_fd);
+		case DST_SEARCH_COMMAND:
+			return dst_cmd_search(payload_buf, session_fd);
 		default:
 			break;
 	}

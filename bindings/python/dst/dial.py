@@ -11,7 +11,25 @@ def _val_service(s):
 	if " " in s:
 		raise ValueError("service names cannot include ' '")
 
-def rawsend(payload):	
+def rawsend(payload, return_all=False):	
+	status = "ERR_BAD_CMD_READ"
+	while status == "ERR_BAD_CMD_READ":
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect(("127.0.0.1", 11818))
+		s.sendall(payload.encode('utf8'))
+		response = s.recv(1024)
+		response = response.split(b'\x00')
+		response = [r.decode('utf8') for r in response]
+		response = [r for r in response if len(r) > 0]
+		s.close()
+		status = response[0]
+		if status == "ERR_BAD_CMD_READ":
+			sleep(0.05)
+	if return_all:
+		return response
+	return response[0]
+
+def rawsend(payload):
 	response = "ERR_BAD_CMD_READ"
 	while response == "ERR_BAD_CMD_READ":
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,7 +39,7 @@ def rawsend(payload):
 		s.close()
 		if response == "ERR_BAD_CMD_READ":
 			sleep(0.05)
-	return response.split(u'\0',1)[0]
+	return response.split(u'\0', 1)[0]
 
 def broker(service):	
 	cmd = "{:<8}".format("BROKER")
@@ -74,6 +92,38 @@ def register(service, port):
 	response = rawsend(cmd + l + payload)
 	return response
 
+def search(prefix):
+	
+	_val_service(prefix)
+
+	# Format arguments
+	cmd = "{:<8}".format("SEARCH")
+	l = "{:<4}".format(len(prefix))
+	payload = cmd + l + prefix
+	
+	# Open the socket, manually decode the response
+	status = "ERR_BAD_CMD_READ"
+	while status == "ERR_BAD_CMD_READ":
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect(("127.0.0.1", 11818))
+		s.sendall(payload.encode('utf8'))
+		response = s.recv(1024).decode('utf8')
+		response = response.split(' ')
+		response = [r for r in response if len(r) > 0]
+		status = response[0]
+		if status == "ERR_BAD_CMD_READ":
+			sleep(0.05)
+
+	num_responses = response[1].strip()
+	num_responses = int(num_responses)
+	recv_responses = len(response[2:])
+	data = " ".join(response[2:])
+	while recv_responses < num_responses:
+		response = s.recv(1024)
+		data += response.decode('utf8')
+		recv_responses = len(data.split(' '))
+	s.close()
+	return [d for d in data.split(' ') if len(d) > 0]
 
 def withdraw(service, port, hostname=socket.gethostname()):
 	

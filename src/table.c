@@ -191,3 +191,71 @@ int dst_cmd_clear() {
 	}
 	return 0;
 }
+
+int dst_cmd_search(const char *str, int session_fd) {
+	size_t plen = strlen(str); /* size of the payload */
+	char buf[8]; /* max response length */
+	/* first four bytes of the response contain the 
+	   number of matching services */
+	int i, j;
+
+	int *matches;
+
+	memset(buf, 0, 8);
+
+	/* allocate enough space to hold all possible matches */
+	matches = calloc(table_capacity, sizeof(int));
+	if (matches == NULL) {
+		perror("dst_cmd_search: allocation failed! ");
+		return -1;
+	}
+
+	/* match any number of services */
+	for (i = 0, j = 0; i < table_capacity; i++) {
+		DST_SERVICE *s = table[i];
+		if (s == NULL) {
+			break;	/* end of table */
+		}
+		if (!s->active) {
+			continue; /* deleted */
+		}
+		if (strncmp(s->service, str, plen) == 0) { /* match */
+			matches[j++] = i;
+		}
+	}
+	
+	/* pseudo-randomly shuffle the response */
+	for (i = 0; i < j; i++) {
+		while(1) {
+			int n = rand() % j;
+			int s3 = matches[i];
+			matches[i] = matches[n];
+			matches[n] = s3;
+			break;
+		}
+	}
+
+	/* Print "OK" to the response */
+	send(session_fd, "OK ", 3, MSG_NOSIGNAL | MSG_MORE);
+
+	/* Print the number of matches to the response */
+	sprintf(buf, "%4d ", j);
+	send(session_fd, buf, 5, MSG_NOSIGNAL | MSG_MORE);
+
+	/* Print them */
+	for (i = 0; i < j; i++) {
+		DST_SERVICE *s = table[i];
+		const char *r = s->service; 
+	        size_t st = send(session_fd, r, strlen(r), MSG_NOSIGNAL | MSG_MORE);
+		if (st == -1) {
+			perror("dst_cmd_search: unable to send");
+			return -1;
+		}
+		send(session_fd, " ", 1, MSG_NOSIGNAL | MSG_MORE);
+	}
+
+	send(session_fd, 0, 0, MSG_NOSIGNAL);
+	
+	free(matches);
+	return 0;
+}
