@@ -55,7 +55,7 @@ static int dst_inner_update_services_table(DST_SERVICE *buf, int start) {
 		int i = dst_find_free_index();
 		if (i == table_capacity) {
 			dst_realloc_services_table();
-			return dst_inner_update_services_table(buf, i);
+			return dst_inner_update_services_table(buf, 0);
 		}
 
 		if (table[i] != NULL) dst_free_table_elem(i);
@@ -195,13 +195,16 @@ int dst_cmd_clear() {
 int dst_cmd_search(const char *str, int session_fd) {
 	size_t plen = strlen(str); /* size of the payload */
 	char buf[8]; /* max response length */
+	char pad[1024];
 	/* first four bytes of the response contain the 
 	   number of matching services */
 	int i, j;
+	size_t sent = 0;
 
 	int *matches;
 
 	memset(buf, 0, 8);
+	memset(pad, 0, 1024);
 
 	/* allocate enough space to hold all possible matches */
 	matches = calloc(table_capacity, sizeof(int));
@@ -224,23 +227,12 @@ int dst_cmd_search(const char *str, int session_fd) {
 		}
 	}
 	
-	/* pseudo-randomly shuffle the response */
-	for (i = 0; i < j; i++) {
-		while(1) {
-			int n = rand() % j;
-			int s3 = matches[i];
-			matches[i] = matches[n];
-			matches[n] = s3;
-			break;
-		}
-	}
-
 	/* Print "OK" to the response */
-	send(session_fd, "OK ", 3, MSG_NOSIGNAL | MSG_MORE);
+	sent += send(session_fd, "OK ", 3, MSG_NOSIGNAL | MSG_MORE);
 
 	/* Print the number of matches to the response */
-	sprintf(buf, "%4d ", j);
-	send(session_fd, buf, 5, MSG_NOSIGNAL | MSG_MORE);
+	sprintf(buf, "%04d ", j);
+	sent += send(session_fd, buf, 5, MSG_NOSIGNAL | MSG_MORE);
 
 	/* Print them */
 	for (i = 0; i < j; i++) {
@@ -251,10 +243,11 @@ int dst_cmd_search(const char *str, int session_fd) {
 			perror("dst_cmd_search: unable to send");
 			return -1;
 		}
-		send(session_fd, " ", 1, MSG_NOSIGNAL | MSG_MORE);
+		sent += send(session_fd, " ", 1, MSG_NOSIGNAL | MSG_MORE);
+		sent += st;
 	}
 
-	send(session_fd, 0, 0, MSG_NOSIGNAL);
+	send(session_fd, pad, sent % 1024, MSG_NOSIGNAL);
 	
 	free(matches);
 	return 0;
