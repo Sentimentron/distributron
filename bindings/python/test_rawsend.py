@@ -43,6 +43,13 @@ class TestRawSend(unittest.TestCase):
 		response = rawsend(cmd + size + payload)
 		self.assertEqual(response, "ERR_BAD_PAYLOAD_SIZE")
 	
+	def test_badpayload_negativesize(self):
+		cmd = "{:<8}".format("BROKER")
+		payload = "{:<1024}".format("BLAH BLAH")
+		size = "{:<4}".format(-40)
+		response = rawsend(cmd + size + payload)
+		self.assertEqual(response, "ERR_BAD_PAYLOAD_SIZE")
+	
 	def test_badpayload_mismatched_size(self):
 		cmd = "{:<8}".format("BROKER")
 		payload = "127.0.0.1:1811:SomeService"
