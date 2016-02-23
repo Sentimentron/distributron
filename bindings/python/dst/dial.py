@@ -23,6 +23,9 @@ def rawsend(payload):
 			sleep(0.05)
 	return response.split(u'\0', 1)[0]
 
+def puck():
+	return rawsend("{:<8}".format("PUCK"))
+
 def broker(service):	
 	cmd = "{:<8}".format("BROKER")
 	l = len(service)

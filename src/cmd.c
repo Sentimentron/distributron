@@ -14,6 +14,8 @@ DST_COMMAND dst_derive_command(const char *buf) {
 		return DST_CLEAR_COMMAND;
 	if (strncmp(buf, "SEARCH  ", DST_COMMAND_MAX_LENGTH) == 0)
 		return DST_SEARCH_COMMAND;
+	if (strncmp(buf, "PUCK    ", DST_COMMAND_MAX_LENGTH) == 0)
+		return DST_PUCK_COMMAND;
 	return DST_UNDEFINED_COMMAND;
 
 }
