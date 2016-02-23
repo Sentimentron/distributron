@@ -121,32 +121,25 @@ int dst_trim_services_table(const DST_SERVICE *service_buf) {
 }
 
 int dst_cmd_broker(const char *payload, int fd) {
-	const DST_SERVICE *ret[16], *shuf[16]; /* can return up to 16 services at once */
+	const DST_SERVICE *ret[16]; /* can return up to 16 services at once */
 	char buf[1024], tmp[1024]; /* used for response message */
-	int i = 0, c = 0;
+	int i = 0, j = 0, c = 0;
 
-	memset(shuf, 0, 16 * sizeof(DST_SERVICE*));
-	memset(ret, 0, 16 * sizeof(DST_SERVICE*));
 	memset(buf, 0, 1024);
 	memset(tmp, 0, 1024);
 	
 	/* look for matching services */
-	while (i < table_capacity && c < 16) {
+	while (i < table_capacity) {
 		const DST_SERVICE *s = dst_search_services_table(&i, payload);
 		if (s == NULL) {
 			break; /* no more services */
 		}
 		if (!s->active) continue;
-		ret[c++] = s;
-	}
-
-	/* pseudo-randomly shuffle the response */
-	for (i = 0; i < c; i++) {
-		while(1) {
-			int n = rand() % c;
-			if (shuf[n]) continue;
-			shuf[n] = ret[i];
-			break;
+		ret[j++] = s;
+		c++;
+		if (c >= 16) {
+			/* overflow behaviour, replace pseudo-randomly */
+			j = rand() % 16;
 		}
 	}
 
@@ -162,8 +155,8 @@ int dst_cmd_broker(const char *payload, int fd) {
 			tmp,
 			1024,
 			" %s:%d",
-			shuf[i]->fqdn,
-			shuf[i]->port
+			ret[i]->fqdn,
+			ret[i]->port
 		);
 		send(fd, tmp, strlen(tmp), MSG_NOSIGNAL | MSG_MORE);
 	}
