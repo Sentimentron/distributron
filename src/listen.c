@@ -136,7 +136,7 @@ int dst_start_listening() {
 	hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
 
 	maxwait.tv_sec = 0;
-	maxwait.tv_usec = 20000; /* 20 ms */
+	maxwait.tv_usec = 5000; /* 5 ms */
 	
 	err = getaddrinfo("127.0.0.1", "11818", &hints, &res);
 	if (err) {
