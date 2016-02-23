@@ -64,7 +64,7 @@ class TestRawSend(unittest.TestCase):
 		l = len(payload)
 		size = "{:<4}".format(l)
 		response = rawsend(cmd + size + payload)
-		self.assertEqual(response, "<null>")
+		self.assertEqual(response, "OK 0")
 
 	def test_bad_delim(self):
 		cmd = "{:<8}".format("REGISTER")

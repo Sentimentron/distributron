@@ -97,10 +97,6 @@ static DST_SERVICE *dst_search_services_table(int *start, const char *name) {
 	return NULL;
 }
 
-static void dsendr(char *r, int fd) {
-	send(fd, r, strlen(r), MSG_NOSIGNAL);
-}
-
 int dst_trim_services_table(const DST_SERVICE *service_buf) {
 	int i, j;
 	for (i = 0, j = 0; i < DST_MAX_SERVICE_SPECS; i++) {
@@ -127,7 +123,7 @@ int dst_trim_services_table(const DST_SERVICE *service_buf) {
 int dst_cmd_broker(const char *payload, int fd) {
 	const DST_SERVICE *ret[16], *shuf[16]; /* can return up to 16 services at once */
 	char buf[1024], tmp[1024]; /* used for response message */
-	int i = 0, j = 0, c = 0;
+	int i = 0, c = 0;
 
 	memset(shuf, 0, 16 * sizeof(DST_SERVICE*));
 	memset(ret, 0, 16 * sizeof(DST_SERVICE*));
@@ -140,7 +136,7 @@ int dst_cmd_broker(const char *payload, int fd) {
 		if (s == NULL) {
 			break; /* no more services */
 		}
-		if (!s->active) continue;	
+		if (!s->active) continue;
 		ret[c++] = s;
 	}
 
@@ -154,29 +150,25 @@ int dst_cmd_broker(const char *payload, int fd) {
 		}
 	}
 
-	/* build the response message */
-	i = 3; j = 0;
-	strcpy(buf, "OK ");
-	while (i < 1024 && j < c) {
-		int s = snprintf(
-				tmp, 
-				1024, 
-				"%s:%d:%s,", 
-				shuf[j]->fqdn,
-				shuf[j]->port,
-				shuf[j]->service
-			);
-		j++;
-		memcpy(buf + i, tmp, s);
-		i += s;
+	/* send the response */
+	send(fd, "OK ", 3, MSG_NOSIGNAL | MSG_MORE);
+	
+	/* send the response count */
+	sprintf(tmp, "%d", c);
+	send(fd, tmp, strlen(tmp), MSG_NOSIGNAL | MSG_MORE);
+
+	for (i = 0; i < c; i++) {
+		snprintf(
+			tmp,
+			1024,
+			" %s:%d",
+			shuf[i]->fqdn,
+			shuf[i]->port
+		);
+		send(fd, tmp, strlen(tmp), MSG_NOSIGNAL | MSG_MORE);
 	}
 
-	/* send the response */
-	if (j == 0) {
-		dsendr("<null>", fd);
-	} else {
-		dsendr(buf, fd);
-	}
+	send(fd, 0, 0, MSG_NOSIGNAL);
 
 	return 0;
 }	

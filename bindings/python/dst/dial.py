@@ -26,34 +26,6 @@ def rawsend(payload):
 def puck():
 	return rawsend("{:<8}".format("PUCK"))
 
-def broker(service):	
-	cmd = "{:<8}".format("BROKER")
-	l = len(service)
-	payload = "{:<1024}".format(service)
-	l = "{:<4}".format(l)
-
-	response = rawsend(cmd + l + payload)
-
-	if response == "<null>":
-		return None
-
-	# If the response is valid, the first few characters
-	# should be 'OK' followed by a space.
-	if response[0:3] == "OK ":
-		response = response[3:]
-		# Each response consists of a port and a FQDN
-		# followed by a comma
-		responses = response.split(',')
-		for response in responses:
-			if len(response) == 0:
-				break
-			fqdn, port, service = response.split(':')
-			yield fqdn, int(port), service
-
-	# Otherwise, the entire response is the error message
-	else:
-		raise Exception(response)
-
 def clearall():
 	return rawsend("{:<8}".format("CLEARALL"))
 
@@ -108,6 +80,46 @@ def search(prefix):
 		recv_responses = len(data.split(' '))
 	s.close()
 	return [d for d in data.split(' ') if len(d) > 0]
+
+def broker(service):	
+	
+	_val_service(service)
+
+	# Format arguments
+	cmd = "{:<8}".format("BROKER")
+	l = len(service)
+	payload = service
+	l = "{:<4}".format(l)
+	payload = cmd + l + payload
+	
+	# Open the socket, manually decode the response
+	status = "ERR_BAD_CMD_READ"
+	try:
+		while status == "ERR_BAD_CMD_READ":
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(("127.0.0.1", 11818))
+			s.sendall(payload.encode('utf8'))
+			response = s.recv(1024).decode('utf8')
+			status, _, response = response.partition(' ')
+			if status == "OK":
+				num_responses, _, response = response.partition(' ')
+			elif status == "ERR_BAD_CMD_READ":
+				sleep(0.05)
+
+		num_responses = int(num_responses)
+		recv_responses = len(response.split(' '))
+		data = response
+		while recv_responses < num_responses:
+			response = s.recv(1024)
+			data += response.rstrip(b'\x00').decode('utf8')
+			recv_responses = len(data.split(' '))
+		for d in data.split(' '):
+			if len(d) == 0:
+				continue
+			host, _, port = d.partition(':')
+			yield host, int(port)
+	finally:
+		s.close()
 
 def withdraw(service, port, hostname=socket.gethostname()):
 	
