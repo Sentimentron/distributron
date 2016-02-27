@@ -12,7 +12,7 @@ These fields are joined together with the <code>:</code> character.
 
 Its response is <code>OK</code> if the registration succeeded.
 
-Multiple registrations of services are permitted and will be stored as separate entities within Distributron. If your service doesn't support more than one requester accessing it concurrently on the same port, check whether any services are currently registered on that port with [`BROKER`](BROKER) before calling `REGISTER`.
+Multiple registrations of services are permitted and will be stored as separate entities within Distributron. If your service doesn't support more than one requester accessing it concurrently on the same port, check whether any services are currently registered on that port with [`BROKER`](cmd-BROKER.md) before calling `REGISTER`.
 
 ## Example
 In this scenario, there's one service (`testService1`) running on the `test-service.yourdomain.com` and it's listening on port 8888.
