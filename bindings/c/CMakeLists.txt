@@ -19,5 +19,6 @@ macro(_DTEST TEST)
   #add_test(memcheck_${TEST} ${memcheck_command} test_${TEST})
 endmacro()
 
-_dtest("puck")
-_dtest("clearall")
+_dtest("fixed_1")
+_dtest("fixed_2")
+
