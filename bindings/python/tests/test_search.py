@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from dst import search, clearall, register
+from distrib import search, clearall, register
 import unittest
 
 class SearchTests(unittest.TestCase):
-	
+
 	def setUp(self):
 		clearall()
 
@@ -21,4 +21,4 @@ class SearchTests(unittest.TestCase):
 		clearall()
 
 if __name__ == "__main__":
-	unittest.main()	
+	unittest.main()

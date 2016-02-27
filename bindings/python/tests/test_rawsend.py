@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
-from dst import rawsend, clearall
+from distrib import rawsend, clearall
 
 class TestRawSend(unittest.TestCase):
 	def setUp(self):
 		clearall()
-		
+
 	def test_badcmd(self):
 		payload = "{:<1024}".format("Hi there!")
 		cmd = "{:<8}".format("HI")
@@ -35,21 +35,21 @@ class TestRawSend(unittest.TestCase):
 		payload = "{:<1024}".format("BLAH BLAH")
 		response = rawsend(cmd + payload)
 		self.assertEqual(response, "ERR_BAD_PAYLOAD_SIZE")
-	
+
 	def test_badpayload_smallsize(self):
 		cmd = "{:<8}".format("BROKER")
 		payload = "{:<1024}".format("BLAH BLAH")
 		size = "{:<4}".format(0)
 		response = rawsend(cmd + size + payload)
 		self.assertEqual(response, "ERR_BAD_PAYLOAD_SIZE")
-	
+
 	def test_badpayload_negativesize(self):
 		cmd = "{:<8}".format("BROKER")
 		payload = "{:<1024}".format("BLAH BLAH")
 		size = "{:<4}".format(-40)
 		response = rawsend(cmd + size + payload)
 		self.assertEqual(response, "ERR_BAD_PAYLOAD_SIZE")
-	
+
 	def test_badpayload_mismatched_size(self):
 		cmd = "{:<8}".format("BROKER")
 		payload = "127.0.0.1:1811:SomeService"
@@ -107,4 +107,4 @@ class TestRawSend(unittest.TestCase):
 		self.assertEqual(response, "ERR_BAD_PORT")
 
 if __name__ == "__main__":
-	unittest.main()	
+	unittest.main()

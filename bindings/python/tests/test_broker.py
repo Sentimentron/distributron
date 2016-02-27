@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from dst import broker, clearall, register
+from distrib import broker, clearall, register
 import socket
 import unittest
 
 class BrokerTests(unittest.TestCase):
-	
+
 	def setUp(self):
 		clearall()
 		register("ReservedTestService", 11819)
@@ -18,9 +18,9 @@ class BrokerTests(unittest.TestCase):
 		self.assertEqual(len(svcs), 1)
 		self.assertEqual(svcs[0][0], socket.gethostname())
 		self.assertEqual(svcs[0][1], 11819)
-	
+
 	def test_cmd_2(self):
-		svcs = list(broker("AnotherReservedTestService"))	
+		svcs = list(broker("AnotherReservedTestService"))
 		self.assertEqual(len(svcs), 1)
 		self.assertEqual(svcs[0][0], socket.gethostname())
 		self.assertEqual(svcs[0][1], 11820)
@@ -28,8 +28,8 @@ class BrokerTests(unittest.TestCase):
 	def test_cmd_multi(self):
 		svcs = list(broker("MultiReservedTestService"))
 		self.assertEqual(len(svcs), 2)
-		self.assertEqual(svcs[0][0], socket.gethostname())	
-		self.assertEqual(svcs[1][0], socket.gethostname())	
+		self.assertEqual(svcs[0][0], socket.gethostname())
+		self.assertEqual(svcs[1][0], socket.gethostname())
 
 if __name__ == "__main__":
 	unittest.main()

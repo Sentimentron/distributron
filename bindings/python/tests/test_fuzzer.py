@@ -4,7 +4,7 @@ import unittest
 
 from random import choice
 from string import ascii_letters
-from dst import rawsend, puck
+from distrib import rawsend, puck
 
 class TestFuzz(unittest.TestCase):
 	def test_lotsofzeros512(self):
@@ -26,7 +26,7 @@ class TestFuzz(unittest.TestCase):
 		payload = ''.join(choice(ascii_letters) for x in range(512))
 		rawsend(payload)
 		self.assertTrue(puck())
-		
+
 
 if __name__ == "__main__":
-	unittest.main()	
+	unittest.main()

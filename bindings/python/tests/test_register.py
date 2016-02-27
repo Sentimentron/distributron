@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import unittest
-from dst import register
+from distrib import register
 
 class TestRegister(unittest.TestCase):
-	
+
 	def test_register(self):
 		response = register("testService", 12311)
 		self.assertEqual(response, "OK")
@@ -16,4 +16,4 @@ class TestRegister(unittest.TestCase):
 
 
 if __name__ == "__main__":
-	unittest.main()	
+	unittest.main()
