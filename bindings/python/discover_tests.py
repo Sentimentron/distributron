@@ -1,3 +1,9 @@
+"""
+Compatibility shim so you can run python3 setup.py test to run the tests.
+
+Credit: http://stackoverflow.com/a/17004409/854911
+"""
+
 import os
 import sys
 import unittest
