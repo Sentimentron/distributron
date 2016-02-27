@@ -66,7 +66,7 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 		return dst_send_badpayloadsize(session_fd);
 	}
 
-	/* Receive argument payload */	
+	/* Receive argument payload */
 	r = recv(session_fd, payload_buf, sz, MSG_WAITALL);
 	if (r == sz) {
 		/* Successfully read */
@@ -80,14 +80,14 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 	} else {
 		return dst_send_badpayload(session_fd);
 	}
-	
+
 	switch(c) {
 		case DST_REGISTER_COMMAND:
 		case DST_WITHDRAW_COMMAND:
 			status = dst_parse_payload_to_specs(
 				payload_buf,
 				service_buf,
-				sz, 
+				sz,
 				session_fd
 			);
 			break;
@@ -118,7 +118,7 @@ int dst_exec_cmd(DST_COMMAND c, int session_fd) {
 	assert(c != DST_UNDEFINED_COMMAND);
 
 	return dst_send_ok(session_fd);
-	
+
 }
 
 int dst_start_listening() {
@@ -137,7 +137,7 @@ int dst_start_listening() {
 
 	maxwait.tv_sec = 0;
 	maxwait.tv_usec = 5000; /* 5 ms */
-	
+
 	err = getaddrinfo("127.0.0.1", "11818", &hints, &res);
 	if (err) {
 		DST_PERROR("failed to resolve local socket address: %s", gai_strerror(err));
@@ -151,7 +151,7 @@ int dst_start_listening() {
 	}
 
 	/* Allows us to restart immediately */
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, 
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR,
  			(char *)&reuse_opt, sizeof(reuse_opt));
 
 	if (bind(server_fd, res->ai_addr, res->ai_addrlen) == -1) {
@@ -167,7 +167,7 @@ int dst_start_listening() {
 	}
 
 	while(1) {
-		int session_fd; 
+		int session_fd;
 		char cmd_buf[DST_COMMAND_MAX_LENGTH];
 		ssize_t r;
 		/* Accept the connection */
@@ -182,15 +182,17 @@ int dst_start_listening() {
 		/* Times out if it takes more than 5ms to recv() */
 		setsockopt(session_fd, SOL_SOCKET, SO_RCVTIMEO,
 				(char *)&maxwait, sizeof(struct timeval));
-		
+
 		/* Read the command */
 		r = recv(session_fd, cmd_buf, DST_COMMAND_MAX_LENGTH, 0);
 		if (r == DST_COMMAND_MAX_LENGTH) {
 			/* Determine which command this is */
 			DST_COMMAND c = dst_derive_command(cmd_buf);
-			if (c == DST_CLEAR_COMMAND) {	
+			if (c == DST_CLEAR_COMMAND) {
 				dst_cmd_clear();
 				dst_send_ok(session_fd);
+      } else if (c == DST_PUCK_COMMAND) {
+        dst_send_ok(session_fd);
 			} else if (c != DST_UNDEFINED_COMMAND) {
 				dst_exec_cmd(c, session_fd);
 			} else {
