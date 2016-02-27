@@ -1,4 +1,4 @@
-The `CLEARALL` command is a raw (payloadless) command which [`WITHDRAW`s](WITHDRAW) all services stored in Distributron. It's intended for use during testing.
+The `CLEARALL` command is a raw (payloadless) command which [`WITHDRAW`s](cmd-WITHDRAW.md) all services stored in Distributron. It's intended for use during testing.
 
 ## Support status
 <table>
