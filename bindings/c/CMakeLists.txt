@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library (distributron socket.c)
+add_library (distributron socket.c fixed.c)
 
 enable_testing()
 
@@ -21,4 +21,5 @@ endmacro()
 
 _dtest("fixed_1")
 _dtest("fixed_2")
-
+_dtest("cmd_puck")
+_dtest("cmd_clearall")
