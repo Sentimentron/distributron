@@ -8,7 +8,7 @@ The `BROKER` command is a length-prefixed payload command. Its response is a spa
 ## Example
 In this scenario, there's one service (`testService1`) running on `host-b.yourdomain.com` on port 8888 which a requester running on `host-a.yourdomain.com` wants to discover. Here's how it happens:
 
-1. The implementation for `testService1` calls [`REGISTER`](REGISTER) when it starts up.
+1. The implementation for `testService1` calls [`REGISTER`](cmd-REGISTER.md) when it starts up.
 1. `host-a.yourdomain.com` sends `BROKER12  testService1` to Distributron.
 1. Distributron responds with `   1 host-b.yourdomain.com:8888`.
 
