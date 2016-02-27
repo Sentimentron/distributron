@@ -8,12 +8,12 @@ The `WITHDRAW` command is a length-prefixed payload command. The payload consist
 * The port that the service is running on.
 * The service name of that service.
 
-It's effect is to remove the service identified by the payload so it no longer appears in [`BROKER`](BROKER).
+It's effect is to remove the service identified by the payload so it no longer appears in [`BROKER`](cmd-BROKER.md).
 
 ## Example
 In this scenario, there's one service (`testService1`) running on `test-service.yourdomain.com` on port 8888 which is now terminating. Here's how it signals to Distributron that it's no longer available:
 
-1. The implementation for `testService1` calls [`REGISTER`](REGISTER) when it starts up.
+1. The implementation for `testService1` calls [`REGISTER`](cmd-REGISTER.md) when it starts up.
 1. `host-a.yourdomain.com` sends `WITHDRAW45  test-service.yourdomain.com:8888:testService1` to Distributron.
 1. Distributron responds with `OK`.
 
