@@ -20,3 +20,4 @@ macro(_DTEST TEST)
 endmacro()
 
 _dtest("puck")
+_dtest("clearall")
