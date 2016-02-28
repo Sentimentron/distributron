@@ -3,12 +3,12 @@
 <tr><td colspan='3'><code>OK</code></td></tr>
 </table>
 
-The `REGISTER` command is a length-prefixed payload command. The payload consists of:
+The `REGISTER` command is a length-prefixed payload command. The payload consists of one or more tuples containing:
 * The host that the service is running on.
 * The port that the service is running on.
 * The service name of that service.
 
-These fields are joined together with the <code>:</code> character.
+These fields are joined together with the <code>:</code> character. Each entry must end with a `,` character.
 
 Its response is <code>OK</code> if the registration succeeded.
 
