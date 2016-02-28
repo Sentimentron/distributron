@@ -9,4 +9,8 @@
 <tr><td>-2</td><td>Bad port number</td>
   <td>Ports must be less than 65536, 0 is reserved.</td>
   <td>Change port values to something inside that range </td></tr>
+<tr><td>-3</td><td>Command error </td>
+  <td>The command failed to execute or timed out.</td>
+  <td>Command specific.</td>
+</tr>
 </table>
