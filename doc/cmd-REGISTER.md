@@ -12,6 +12,8 @@ These fields are joined together with the <code>:</code> character.
 
 Its response is <code>OK</code> if the registration succeeded.
 
+The total size of the payload must be less than 1024 bytes.
+
 Multiple registrations of services are permitted and will be stored as separate entities within Distributron. If your service doesn't support more than one requester accessing it concurrently on the same port, check whether any services are currently registered on that port with [`BROKER`](cmd-BROKER.md) before calling `REGISTER`.
 
 ## Example
