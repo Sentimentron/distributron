@@ -19,7 +19,7 @@ Multiple registrations of services are permitted and will be stored as separate 
 ## Example
 In this scenario, there's one service (`testService1`) running on the `test-service.yourdomain.com` and it's listening on port 8888.
 
-1. `test-service.yourdomain.com` sends `REGISTER45  test-service.yourdomain.com:8888:testService1` to Distributron.
+1. `test-service.yourdomain.com` sends `REGISTER45  test-service.yourdomain.com:8888:testService1,` to Distributron.
 1. Distributron responds with `OK`.
 
 ## Support status
