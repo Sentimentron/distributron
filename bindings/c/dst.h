@@ -8,4 +8,6 @@ int dst_puck(void);
   Returns 0 on success, -1 otherwise. */
 int dst_clearall(void);
 
+int dst_register(const char *, int port, const char *);
+
 #endif

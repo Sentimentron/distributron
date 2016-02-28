@@ -39,10 +39,13 @@ int dst_trans_fixed_out(const char *in, char *out) {
 
 
   /* Receive the message */
-  n = read(sockfd, out, 1023);
-  if (n < 0) {
-    perror("read error");
-    goto close_skt;
+  while(1) {
+    n = read(sockfd, out, 1023);
+    if (n < 0) {
+      perror("read error");
+      goto close_skt;
+    }
+    if (strcmp(out, "ERR_BAD_CMD_READ")) break;
   }
   ret = 0;
 close_skt:
@@ -50,4 +53,20 @@ close_skt:
   return ret;
 }
 
+/* Execute a payload transaction against Distributron */
+int dst_trans_payload(const char *cmd, const char *args, char *out) {
 
+  char buf[1024];
+  size_t sza = strlen(args);
+  size_t szs = strlen(cmd);
+
+  if (sza + szs >= 1020)
+    return -1; /* bad size */
+
+  /* Format the command */
+  snprintf(buf, 1024, "%*s%0*d%s", 8, cmd, 4, sza, args);
+
+  /* Execute the command */
+  return dst_trans_fixed_out(buf, out);
+
+}
